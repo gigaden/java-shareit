@@ -12,7 +12,6 @@ import ru.practicum.shareit.request.ItemRequest;
 @Builder
 public class ItemDto {
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    private Long id;
     private String name;
     private String description;
     private boolean available;

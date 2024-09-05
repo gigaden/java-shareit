@@ -38,9 +38,8 @@ public class UserServiceImpl implements UserService {
         log.info("Попытка получить пользователя с id={}", id);
         User user = userStorage.get(id)
                 .orElseThrow(() -> new NotFoundException(String.format("Пользователь с id=%d не найден", id)));
-        UserDto userDto = UserMapper.mapToUserDto(user);
         log.info("Пользователь с id = {} успешно передан.", id);
-        return userDto;
+        return UserMapper.mapToUserDto(user);
     }
 
     @Override
@@ -49,7 +48,9 @@ public class UserServiceImpl implements UserService {
         if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
         }
-        return userStorage.create(user);
+        User newUser = userStorage.create(user);
+        log.info("Пользователь с id={} успешно создан.", user.getId());
+        return newUser;
     }
 
     @Override

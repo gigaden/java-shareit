@@ -27,7 +27,6 @@ public class UserStorageImpl implements UserStorage{
     public User create(User user) {
         user.setId(getNextId());
         users.put(user.getId(), user);
-        log.info("Пользователь с id={} успешно создан.", user.getId());
         return user;
     }
 

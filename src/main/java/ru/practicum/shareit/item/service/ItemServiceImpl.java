@@ -33,16 +33,19 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public Collection<ItemDto> getAll() {
-        return itemStorage.getAll().stream()
-                .map(ItemMapper::mapToItemDto).collect(Collectors.toList());
+        log.info("Попытка получить все вещи.");
+        List<ItemDto> items = itemStorage.getAll().stream()
+                .map(ItemMapper::mapToItemDto).toList();
+        log.info("Коллекция вещей успешно передана.");
+        return items;
     }
 
     @Override
     public Collection<ItemDto> getAllUserItems(long userId) {
         log.info("Получаем коллекцию всех вещей пользователя с id={}.", userId);
-        Collection<ItemDto> items = itemStorage.getAllUserItems(userId).stream()
+        List<ItemDto> items = itemStorage.getAllUserItems(userId).stream()
                 .filter(i -> i.getOwner() == userId)
-                .map(ItemMapper::mapToItemDto).collect(Collectors.toList());
+                .map(ItemMapper::mapToItemDto).toList();
         log.info("Коллекция вещей пользователя с id={} успешно передана.", userId);
         return items;
     }
@@ -78,10 +81,7 @@ public class ItemServiceImpl implements ItemService {
         }
         Item oldItem = itemStorage.get(newItem.getId())
                 .orElseThrow(() -> new NotFoundException(String.format("Вещь с id=%d не найдена", newItem.getId())));
-        if (oldItem.getOwner() != userId) {
-            log.warn("не совпадают id пользователя и собственника вещи.");
-            throw new ValidationException("Нельзя изменить чужую вещь.");
-        }
+        checkUserIsOwnerOfItem(oldItem.getOwner(), userId);
         Item item = itemStorage.update(newItem);
         log.info("Вещь с id = {} успешно обновлена", item.getId());
         return item;
@@ -90,15 +90,9 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public Item patch(long itemId, long userId, ItemDto itemDto) {
         log.info("Попытка обновить вещь через patch.");
-//        if (itemDto.getName() == null && itemDto.getDescription() == null && itemDto.getAvailable() == null) {
-//            throw new ValidationNullException("Отсутствуют данные для обновления.");
-//        }
         Item oldItem = itemStorage.get(itemId)
                 .orElseThrow(() -> new NotFoundException(String.format("Вещь с id=%d не найдена", itemId)));
-        if (oldItem.getOwner() != userId) {
-            log.warn("не совпадают id пользователя и собственника вещи.");
-            throw new ValidationException("Нельзя изменить чужую вещь.");
-        }
+        checkUserIsOwnerOfItem(oldItem.getOwner(), userId);
         Item item = itemStorage.patch(itemId, itemDto);
         log.info("Информация о вещи с id={} успешно обновлена.", itemId);
         return item;
@@ -123,5 +117,13 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public void delete(long id) {
         itemStorage.delete(id);
+    }
+
+    // Проверяем, что пользователь - собственник вещи.
+    private void checkUserIsOwnerOfItem(long ownerId, long userId) {
+        if (ownerId != userId) {
+            log.warn("не совпадают id пользователя и собственника вещи.");
+            throw new ValidationException("Нельзя изменить чужую вещь.");
+        }
     }
 }

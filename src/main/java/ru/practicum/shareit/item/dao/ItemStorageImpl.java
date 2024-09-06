@@ -2,7 +2,6 @@ package ru.practicum.shareit.item.dao;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
-import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
 
@@ -11,7 +10,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Repository("itemStorageImpl")
 @Slf4j
@@ -26,7 +24,7 @@ public class ItemStorageImpl implements ItemStorage {
 
     @Override
     public Collection<Item> getAllUserItems(long userId) {
-        return items.values().stream().filter(i -> i.getOwner() == userId).collect(Collectors.toList());
+        return items.values().stream().filter(i -> i.getOwner() == userId).toList();
     }
 
     @Override
@@ -43,17 +41,13 @@ public class ItemStorageImpl implements ItemStorage {
 
     @Override
     public Item update(Item newItem) {
-        if (items.containsKey(newItem.getId())) {
-            Item oldItem = items.get(newItem.getId());
-            oldItem.setName(newItem.getName());
-            oldItem.setDescription(newItem.getDescription());
-            oldItem.setOwner(newItem.getOwner());
-            oldItem.setAvailable(newItem.getAvailable());
-            oldItem.setRequest(newItem.getRequest());
-            return oldItem;
-        }
-        log.warn("Вещь с id={} не найдена.", newItem.getId());
-        throw new NotFoundException("Вещь с id = " + newItem.getId() + " не найдена.");
+        Item oldItem = items.get(newItem.getId());
+        oldItem.setName(newItem.getName());
+        oldItem.setDescription(newItem.getDescription());
+        oldItem.setOwner(newItem.getOwner());
+        oldItem.setAvailable(newItem.getAvailable());
+        oldItem.setRequest(newItem.getRequest());
+        return oldItem;
     }
 
     @Override

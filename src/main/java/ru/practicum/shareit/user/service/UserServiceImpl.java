@@ -83,7 +83,7 @@ public class UserServiceImpl implements UserService {
         log.info("Попытка удалить пользователя с id={}.", id);
         get(id);
         userStorage.delete(id);
-        log.info("Пользоавтель удалён id={}.", id);
+        log.info("Пользователь с id={} удалён.", id);
     }
 
     // Проверяем уникальность email

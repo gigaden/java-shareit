@@ -14,7 +14,6 @@ import ru.practicum.shareit.user.service.UserService;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service("itemServiceImpl")
 @Slf4j

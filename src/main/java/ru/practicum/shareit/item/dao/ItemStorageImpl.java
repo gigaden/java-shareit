@@ -3,20 +3,29 @@ package ru.practicum.shareit.item.dao;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.model.User;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Repository("itemStorageImpl")
 @Slf4j
-public class ItemStorageImpl implements ItemStorage{
+public class ItemStorageImpl implements ItemStorage {
     private final Map<Long, Item> items = new HashMap<>();
+
+    @Override
+    public Collection<Item> getAll() {
+        return items.values();
+    }
 
 
     @Override
-    public Collection<Item> getAll(long userId) {
+    public Collection<Item> getAllUserItems(long userId) {
         return items.values().stream().filter(i -> i.getOwner() == userId).collect(Collectors.toList());
     }
 
@@ -39,9 +48,8 @@ public class ItemStorageImpl implements ItemStorage{
             oldItem.setName(newItem.getName());
             oldItem.setDescription(newItem.getDescription());
             oldItem.setOwner(newItem.getOwner());
-            oldItem.setAvailable(newItem.isAvailable());
+            oldItem.setAvailable(newItem.getAvailable());
             oldItem.setRequest(newItem.getRequest());
-            log.info("Информация о вещи с id={} успешно обновлена.", oldItem.getId());
             return oldItem;
         }
         log.warn("Вещь с id={} не найдена.", newItem.getId());
@@ -49,8 +57,12 @@ public class ItemStorageImpl implements ItemStorage{
     }
 
     @Override
-    public Item patch(Item item) {
-        return null;
+    public Item patch(long itemId, ItemDto itemDto) {
+        Item oldItem = items.get(itemId);
+        oldItem.setName(itemDto.getName() != null ? itemDto.getName() : oldItem.getName());
+        oldItem.setDescription(itemDto.getDescription() != null ? itemDto.getDescription() : oldItem.getDescription());
+        oldItem.setAvailable(itemDto.getAvailable() != null ? itemDto.getAvailable() : oldItem.getAvailable());
+        return oldItem;
     }
 
     @Override
@@ -60,7 +72,7 @@ public class ItemStorageImpl implements ItemStorage{
 
     @Override
     public void delete(long id) {
-
+        items.remove(id);
     }
 
 

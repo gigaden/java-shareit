@@ -7,11 +7,10 @@ import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.exception.ValidationNullException;
 import ru.practicum.shareit.item.dao.ItemStorage;
-import ru.practicum.shareit.item.dao.ItemStorageImpl;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.user.service.UserService;
 
 import java.util.Collection;
 import java.util.List;
@@ -24,14 +23,25 @@ public class ItemServiceImpl implements ItemService {
     @Qualifier("itemStorageImpl")
     private final ItemStorage itemStorage;
 
-    public ItemServiceImpl(ItemStorage itemStorage) {
+    @Qualifier("userServiceImpl")
+    private final UserService userService;
+
+    public ItemServiceImpl(ItemStorage itemStorage, UserService userService) {
         this.itemStorage = itemStorage;
+        this.userService = userService;
     }
 
     @Override
-    public Collection<ItemDto> getAll(long userId) {
+    public Collection<ItemDto> getAll() {
+        return itemStorage.getAll().stream()
+                .map(ItemMapper::mapToItemDto).collect(Collectors.toList());
+    }
+
+    @Override
+    public Collection<ItemDto> getAllUserItems(long userId) {
         log.info("Получаем коллекцию всех вещей пользователя с id={}.", userId);
-        Collection<ItemDto> items = itemStorage.getAll(userId).stream()
+        Collection<ItemDto> items = itemStorage.getAllUserItems(userId).stream()
+                .filter(i -> i.getOwner() == userId)
                 .map(ItemMapper::mapToItemDto).collect(Collectors.toList());
         log.info("Коллекция вещей пользователя с id={} успешно передана.", userId);
         return items;
@@ -49,6 +59,11 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public Item create(ItemDto itemDto, long userId) {
         log.info("Попытка добавить вещь {}", itemDto.getName());
+        userService.get(userId);
+        if (itemDto.getName() == null || itemDto.getName().isBlank()) {
+            log.warn("Не указано имя вещи.");
+            throw new ValidationNullException("Имя не может быть пустым.");
+        }
         Item item = itemStorage.create(ItemMapper.mapToItem(itemDto, userId));
         log.info("Вещь с id={} успешно добавлена.", item.getId());
         return item;
@@ -73,17 +88,40 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public Item patch(long itemId, long userId) {
-        return null;
+    public Item patch(long itemId, long userId, ItemDto itemDto) {
+        log.info("Попытка обновить вещь через patch.");
+//        if (itemDto.getName() == null && itemDto.getDescription() == null && itemDto.getAvailable() == null) {
+//            throw new ValidationNullException("Отсутствуют данные для обновления.");
+//        }
+        Item oldItem = itemStorage.get(itemId)
+                .orElseThrow(() -> new NotFoundException(String.format("Вещь с id=%d не найдена", itemId)));
+        if (oldItem.getOwner() != userId) {
+            log.warn("не совпадают id пользователя и собственника вещи.");
+            throw new ValidationException("Нельзя изменить чужую вещь.");
+        }
+        Item item = itemStorage.patch(itemId, itemDto);
+        log.info("Информация о вещи с id={} успешно обновлена.", itemId);
+        return item;
+
     }
 
     @Override
     public Collection<ItemDto> search(String text) {
-        return null;
+        log.info("Попытка найти вещи с текстом '{}'", text);
+        if (text.isEmpty()) {
+            return List.of();
+        }
+        List<ItemDto> itemsDto = getAll().stream()
+                .filter(i -> i.getDescription().toLowerCase().contains(text.toLowerCase()) ||
+                        i.getName().toLowerCase().contains(text.toLowerCase()))
+                .filter(ItemDto::getAvailable)
+                .toList();
+        log.info("Коллекция вещей с текстом '{}' успешно передана", text);
+        return itemsDto;
     }
 
     @Override
     public void delete(long id) {
-
+        itemStorage.delete(id);
     }
 }

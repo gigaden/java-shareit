@@ -3,6 +3,7 @@ package ru.practicum.shareit.user.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.exception.EmailUniqueException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidationNullException;
 import ru.practicum.shareit.user.dao.UserStorage;
@@ -45,9 +46,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public User create(User user) {
         log.info("Попытка создать пользователя");
-        if (user.getName() == null || user.getName().isBlank()) {
-            user.setName(user.getLogin());
-        }
+        emailIsUnique(user.getEmail());
         User newUser = userStorage.create(user);
         log.info("Пользователь с id={} успешно создан.", user.getId());
         return newUser;
@@ -61,8 +60,21 @@ public class UserServiceImpl implements UserService {
             throw new ValidationNullException("Id должен быть указан.");
         }
         get(newUser.getId());
+        emailIsUnique(newUser.getEmail());
         User user = userStorage.update(newUser);
         log.info("Пользователь с id = {} успешно обновлён", user.getId());
+        return user;
+    }
+
+    @Override
+    public User patch(long userId, UserDto userDto) {
+        log.info("Попытка обновить пользователя через patch.");
+        get(userId);
+        if (userDto.getEmail() != null) {
+            emailIsUnique(userDto.getEmail());
+        }
+        User user = userStorage.patch(userId, userDto);
+        log.info("Пользователь с id = {} успешно обновлён", userId);
         return user;
     }
 
@@ -72,5 +84,13 @@ public class UserServiceImpl implements UserService {
         get(id);
         userStorage.delete(id);
         log.info("Пользоавтель удалён id={}.", id);
+    }
+
+    // Проверяем уникальность email
+    private void emailIsUnique(String email) {
+        if (!getAll().stream().filter(i -> i.getEmail().equals(email)).toList().isEmpty()) {
+            log.warn("Email {} уже существует", email);
+            throw new EmailUniqueException(String.format("Email %s уже существует", email));
+        }
     }
 }

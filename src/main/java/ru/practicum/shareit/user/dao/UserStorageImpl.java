@@ -3,13 +3,17 @@ package ru.practicum.shareit.user.dao;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 @Repository("userStorageImpl")
 @Slf4j
-public class UserStorageImpl implements UserStorage{
+public class UserStorageImpl implements UserStorage {
     private final Map<Long, User> users = new HashMap<>();
 
 
@@ -34,9 +38,7 @@ public class UserStorageImpl implements UserStorage{
     public User update(User newUser) {
         if (users.containsKey(newUser.getId())) {
             User oldUser = users.get(newUser.getId());
-            oldUser.setName(newUser.getName() == null || newUser.getName().isBlank() ?
-                    newUser.getLogin() : newUser.getName());
-            oldUser.setLogin(newUser.getLogin());
+            oldUser.setName(newUser.getName());
             oldUser.setEmail(newUser.getEmail());
             log.info("Информация о пользователе с id={} успешно обновлена.", oldUser.getId());
             return oldUser;
@@ -46,11 +48,18 @@ public class UserStorageImpl implements UserStorage{
     }
 
     @Override
+    public User patch(long userId, UserDto userDto) {
+        User user = users.get(userId);
+        user.setName(userDto.getName() != null ? userDto.getName() : user.getName());
+        user.setEmail(userDto.getEmail() != null ? userDto.getEmail() : user.getEmail());
+        return user;
+    }
+
+    @Override
     public void delete(long id) {
         users.remove(id);
         log.info("Пользователь с id={} удалён.", id);
     }
-
 
 
     // Метод для генерации идентификатора

@@ -3,16 +3,25 @@ package ru.practicum.shareit.item;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemService;
 
 import java.util.Collection;
 
-/**
- * TODO Sprint add-controllers.
- */
+
 @RestController
 @RequestMapping("/items")
 public class ItemController {
@@ -26,8 +35,8 @@ public class ItemController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public Collection<ItemDto> getAll(@RequestHeader("X-Later-User-Id") long userId) {
-        return itemService.getAll(userId);
+    public Collection<ItemDto> getAll(@RequestHeader("X-Sharer-User-Id") long userId) {
+        return itemService.getAllUserItems(userId);
     }
 
     @GetMapping("/{itemId}")
@@ -38,28 +47,29 @@ public class ItemController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Item create(@RequestHeader("X-Later-User-Id") Long userId,
+    public Item create(@RequestHeader("X-Sharer-User-Id") long userId,
                        @Valid @RequestBody ItemDto itemDto) {
         return itemService.create(itemDto, userId);
     }
 
     @PutMapping
     @ResponseStatus(HttpStatus.OK)
-    public Item update(@RequestHeader("X-Later-User-Id") long userId,
+    public Item update(@RequestHeader("X-Sharer-User-Id") long userId,
                        @Valid @RequestBody Item item) {
         return itemService.update(item, userId);
     }
 
     @PatchMapping("/{itemId}")
     @ResponseStatus(HttpStatus.OK)
-    public Item patch(@RequestHeader("X-Later-User-Id") long userId,
-                      @PathVariable long itemId) {
-        return itemService.patch(itemId, userId);
+    public Item patch(@RequestHeader("X-Sharer-User-Id") long userId,
+                      @PathVariable long itemId,
+                      @Valid @RequestBody ItemDto itemDto) {
+        return itemService.patch(itemId, userId, itemDto);
     }
 
     @GetMapping("/search")
     @ResponseStatus(HttpStatus.OK)
-    public Collection<ItemDto> search(@RequestParam(required = false) String text) {
+    public Collection<ItemDto> search(@RequestParam String text) {
         return itemService.search(text);
     }
 

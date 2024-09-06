@@ -7,7 +7,9 @@ import java.util.Collection;
 
 public interface ItemService {
 
-    Collection<ItemDto> getAll(long userId);
+    Collection<ItemDto> getAll();
+
+    Collection<ItemDto> getAllUserItems(long userId);
 
     ItemDto get(long id);
 
@@ -15,7 +17,7 @@ public interface ItemService {
 
     Item update(Item item, long userId);
 
-    Item patch(long itemId, long userId);
+    Item patch(long itemId, long userId, ItemDto itemDto);
 
     Collection<ItemDto> search(String text);
 

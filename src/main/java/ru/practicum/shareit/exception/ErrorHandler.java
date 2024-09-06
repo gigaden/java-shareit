@@ -18,16 +18,19 @@ public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public HashMap<String, String> handleNotFound(final NotFoundException e, WebRequest request) {
+        log.error("Ошибка 404 NotFoundException: {}", e.getMessage());
         HashMap<String, String> response = new HashMap<>();
         response.put("error", e.getMessage());
         return response;
     }
 
     @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleValidation(final ValidationException e) {
-        log.error("Ошибка 400 ValidationException: {}", e.getMessage());
-        return new ErrorResponse(e.getMessage());
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public HashMap<String, String> handleValidation(final ValidationException e, WebRequest request) {
+        log.error("Ошибка 404 ValidationException: {}", e.getMessage());
+        HashMap<String, String> response = new HashMap<>();
+        response.put("error", e.getMessage());
+        return response;
     }
 
     @ExceptionHandler
@@ -42,6 +45,14 @@ public class ErrorHandler {
     public ErrorResponse handleMethodArgumentNotValidException(final MethodArgumentNotValidException e) {
         log.error("Ошибка 400 MethodArgumentNotValidException: {}", e.getMessage());
         return new ErrorResponse(e.getMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public HashMap<String, String> handleEmailUniqueException(final EmailUniqueException e, WebRequest request) {
+        HashMap<String, String> response = new HashMap<>();
+        response.put("error", e.getMessage());
+        return response;
     }
 
     @ExceptionHandler

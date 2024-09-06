@@ -7,10 +7,10 @@ public class ItemMapper {
 
     public static ItemDto mapToItemDto(Item item) {
         return ItemDto.builder()
+                .id(item.getId())
                 .name(item.getName())
                 .description(item.getDescription())
-                .available(item.isAvailable())
-                .request(item.getRequest() != null ? item.getRequest().getId() : null)
+                .available(item.getAvailable())
                 .build();
     }
 
@@ -19,7 +19,8 @@ public class ItemMapper {
                 .id(userId)
                 .name(itemDto.getName())
                 .description(itemDto.getDescription())
-                .available(itemDto.isAvailable())
+                .available(itemDto.getAvailable())
+                .owner(userId)
                 .request(null)
                 .build();
     }

@@ -5,16 +5,13 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NonNull;
 
-/**
- * TODO Sprint add-controllers.
- */
+
 @Data
 @Builder
 public class User {
     private Long id;
-    private String name;
     @NonNull
-    private String login;
+    private String name;
     @Email
     @NonNull
     private String email;

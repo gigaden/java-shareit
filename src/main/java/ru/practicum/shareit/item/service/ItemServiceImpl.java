@@ -43,7 +43,6 @@ public class ItemServiceImpl implements ItemService {
     public Collection<ItemDto> getAllUserItems(long userId) {
         log.info("Получаем коллекцию всех вещей пользователя с id={}.", userId);
         List<ItemDto> items = itemStorage.getAllUserItems(userId).stream()
-                .filter(i -> i.getOwner() == userId)
                 .map(ItemMapper::mapToItemDto).toList();
         log.info("Коллекция вещей пользователя с id={} успешно передана.", userId);
         return items;
@@ -102,6 +101,7 @@ public class ItemServiceImpl implements ItemService {
     public Collection<ItemDto> search(String text) {
         log.info("Попытка найти вещи с текстом '{}'", text);
         if (text.isEmpty()) {
+            log.warn("Не задан текст для поиска");
             return List.of();
         }
         List<ItemDto> itemsDto = getAll().stream()
@@ -109,12 +109,17 @@ public class ItemServiceImpl implements ItemService {
                         i.getName().toLowerCase().contains(text.toLowerCase()))
                 .filter(ItemDto::getAvailable)
                 .toList();
+        if (itemsDto.isEmpty()) {
+            log.info("Совпадений с текстом '{}' не найдено", text);
+            return itemsDto;
+        }
         log.info("Коллекция вещей с текстом '{}' успешно передана", text);
         return itemsDto;
     }
 
     @Override
     public void delete(long id) {
+        get(id);
         itemStorage.delete(id);
     }
 

@@ -1,9 +1,7 @@
-package ru.practicum.shareit.item.dao;
+package ru.practicum.shareit.item;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
-import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.model.Item;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -46,7 +44,7 @@ public class ItemStorageImpl implements ItemStorage {
         oldItem.setDescription(newItem.getDescription());
         oldItem.setOwner(newItem.getOwner());
         oldItem.setAvailable(newItem.getAvailable());
-        oldItem.setRequest(newItem.getRequest());
+        //oldItem.setRequest(newItem.getRequest());
         return oldItem;
     }
 

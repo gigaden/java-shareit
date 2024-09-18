@@ -1,4 +1,4 @@
-package ru.practicum.shareit.item.model;
+package ru.practicum.shareit.item;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
@@ -21,6 +21,6 @@ public class Item {
     @NotBlank
     private Boolean available;
     private Long owner;
-    private ItemRequest request;
+    // private ItemRequest request;
 
 }

@@ -4,9 +4,9 @@ import java.util.Collection;
 
 public interface UserService {
 
-    Collection<UserDto> getAll();
+    Collection<User> getAll();
 
-    UserDto get(long id);
+    User get(long id);
 
     User create(User user);
 

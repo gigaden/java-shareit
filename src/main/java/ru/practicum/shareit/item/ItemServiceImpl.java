@@ -75,7 +75,7 @@ public class ItemServiceImpl implements ItemService {
         }
         Item oldItem = itemStorage.get(newItem.getId())
                 .orElseThrow(() -> new NotFoundException(String.format("Вещь с id=%d не найдена", newItem.getId())));
-        checkUserIsOwnerOfItem(oldItem.getOwner(), userId);
+        checkUserIsOwnerOfItem(oldItem.getOwner().getId(), userId);
         Item item = itemStorage.update(newItem);
         log.info("Вещь с id = {} успешно обновлена", item.getId());
         return item;
@@ -86,7 +86,7 @@ public class ItemServiceImpl implements ItemService {
         log.info("Попытка обновить вещь через patch.");
         Item oldItem = itemStorage.get(itemId)
                 .orElseThrow(() -> new NotFoundException(String.format("Вещь с id=%d не найдена", itemId)));
-        checkUserIsOwnerOfItem(oldItem.getOwner(), userId);
+        checkUserIsOwnerOfItem(oldItem.getOwner().getId(), userId);
         Item item = itemStorage.patch(itemId, itemDto);
         log.info("Информация о вещи с id={} успешно обновлена.", itemId);
         return item;

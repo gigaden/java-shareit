@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Collection;
+import java.util.stream.Collectors;
 
 
 @RestController
@@ -32,13 +33,14 @@ public class UserController {
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public Collection<UserDto> getAll() {
-        return userService.getAll();
+        return userService.getAll().stream()
+                .map(UserMapper::mapToUserDto).collect(Collectors.toList());
     }
 
     @GetMapping("/{userId}")
     @ResponseStatus(HttpStatus.OK)
     public UserDto get(@PathVariable long userId) {
-        return userService.get(userId);
+        return UserMapper.mapToUserDto(userService.get(userId));
     }
 
     @PostMapping

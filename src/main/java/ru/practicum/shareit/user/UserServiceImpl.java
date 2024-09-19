@@ -14,36 +14,34 @@ import java.util.stream.Collectors;
 @Slf4j
 public class UserServiceImpl implements UserService {
 
-    @Qualifier("userStorageImpl")
-    private final UserStorage userStorage;
+    private final UserRepository userRepository;
 
-    public UserServiceImpl(UserStorage userStorage) {
-        this.userStorage = userStorage;
+    public UserServiceImpl(UserRepository userRepository) {
+        this.userRepository = userRepository;
     }
 
     @Override
-    public Collection<UserDto> getAll() {
+    public Collection<User> getAll() {
         log.info("Получаем коллекцию всех пользователей.");
-        Collection<UserDto> users = userStorage.getAll().stream()
-                .map(UserMapper::mapToUserDto).collect(Collectors.toList());
+        Collection<User> users = userRepository.findAll();
         log.info("Пользователи успешно переданы");
         return users;
     }
 
     @Override
-    public UserDto get(long id) {
+    public User get(long id) {
         log.info("Попытка получить пользователя с id={}", id);
-        User user = userStorage.get(id)
+        User user = userRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(String.format("Пользователь с id=%d не найден", id)));
         log.info("Пользователь с id = {} успешно передан.", id);
-        return UserMapper.mapToUserDto(user);
+        return user;
     }
 
     @Override
     public User create(User user) {
         log.info("Попытка создать пользователя");
         emailIsUnique(user.getEmail());
-        User newUser = userStorage.create(user);
+        User newUser = userRepository.save(user);
         log.info("Пользователь с id={} успешно создан.", user.getId());
         return newUser;
     }
@@ -55,9 +53,12 @@ public class UserServiceImpl implements UserService {
             log.warn("не указан Id пользователя.");
             throw new ValidationNullException("Id должен быть указан.");
         }
-        get(newUser.getId());
+
         emailIsUnique(newUser.getEmail());
-        User user = userStorage.update(newUser);
+        User oldUser = get(newUser.getId());
+        oldUser.setName(newUser.getName());
+        oldUser.setEmail(newUser.getEmail());
+        User user = userRepository.save(oldUser);
         log.info("Пользователь с id = {} успешно обновлён", user.getId());
         return user;
     }
@@ -65,11 +66,13 @@ public class UserServiceImpl implements UserService {
     @Override
     public User patch(long userId, UserDto userDto) {
         log.info("Попытка обновить пользователя через patch.");
-        get(userId);
+        User user = get(userId);
         if (userDto.getEmail() != null) {
             emailIsUnique(userDto.getEmail());
         }
-        User user = userStorage.patch(userId, userDto);
+        user.setName(userDto.getName() != null ? userDto.getName() : user.getName());
+        user.setEmail(userDto.getEmail() != null ? userDto.getEmail() : user.getEmail());
+        userRepository.save(user);
         log.info("Пользователь с id = {} успешно обновлён", userId);
         return user;
     }
@@ -78,7 +81,7 @@ public class UserServiceImpl implements UserService {
     public void delete(long id) {
         log.info("Попытка удалить пользователя с id={}.", id);
         get(id);
-        userStorage.delete(id);
+        userRepository.deleteById(id);
         log.info("Пользователь с id={} удалён.", id);
     }
 

@@ -4,11 +4,11 @@ import java.util.Collection;
 
 public interface ItemService {
 
-    Collection<ItemDto> getAll();
+    Collection<Item> getAll();
 
-    Collection<ItemDto> getAllUserItems(long userId);
+    Collection<Item> getAllUserItems(long userId);
 
-    ItemDto get(long id);
+    Item get(long id);
 
     Item create(ItemDto itemDto, long userId);
 
@@ -16,7 +16,7 @@ public interface ItemService {
 
     Item patch(long itemId, long userId, ItemDto itemDto);
 
-    Collection<ItemDto> search(String text);
+    Collection<Item> search(String text);
 
     void delete(long id);
 }

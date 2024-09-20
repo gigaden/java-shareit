@@ -33,13 +33,14 @@ public class ItemController {
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public Collection<ItemDto> getAll(@RequestHeader("X-Sharer-User-Id") long userId) {
-        return itemService.getAllUserItems(userId);
+        return itemService.getAllUserItems(userId).stream()
+                .map(ItemMapper::mapToItemDto).toList();
     }
 
     @GetMapping("/{itemId}")
     @ResponseStatus(HttpStatus.OK)
     public ItemDto get(@PathVariable long itemId) {
-        return itemService.get(itemId);
+        return ItemMapper.mapToItemDto(itemService.get(itemId));
     }
 
     @PostMapping
@@ -67,7 +68,8 @@ public class ItemController {
     @GetMapping("/search")
     @ResponseStatus(HttpStatus.OK)
     public Collection<ItemDto> search(@RequestParam String text) {
-        return itemService.search(text);
+        return itemService.search(text).stream()
+                .map(ItemMapper::mapToItemDto).toList();
     }
 
     @DeleteMapping("/{itemId}")

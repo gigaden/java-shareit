@@ -1,5 +1,6 @@
 package ru.practicum.shareit.user;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -13,6 +14,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
+import lombok.ToString;
 import ru.practicum.shareit.item.Item;
 
 import java.util.List;
@@ -40,5 +42,6 @@ public class User {
     private String email;
 
     @OneToMany(mappedBy = "owner")
+    @JsonManagedReference
     private List<Item> items;
 }

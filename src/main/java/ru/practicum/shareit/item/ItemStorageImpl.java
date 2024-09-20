@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+@Deprecated
 @Repository("itemStorageImpl")
 @Slf4j
 public class ItemStorageImpl implements ItemStorage {

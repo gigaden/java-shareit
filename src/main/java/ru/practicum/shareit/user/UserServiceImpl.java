@@ -3,6 +3,7 @@ package ru.practicum.shareit.user;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.EmailUniqueException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidationNullException;
@@ -12,6 +13,7 @@ import java.util.stream.Collectors;
 
 @Service("userServiceImpl")
 @Slf4j
+@Transactional
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
@@ -21,6 +23,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Collection<User> getAll() {
         log.info("Получаем коллекцию всех пользователей.");
         Collection<User> users = userRepository.findAll();
@@ -29,6 +32,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public User get(long id) {
         log.info("Попытка получить пользователя с id={}", id);
         User user = userRepository.findById(id)
@@ -53,7 +57,6 @@ public class UserServiceImpl implements UserService {
             log.warn("не указан Id пользователя.");
             throw new ValidationNullException("Id должен быть указан.");
         }
-
         emailIsUnique(newUser.getEmail());
         User oldUser = get(newUser.getId());
         oldUser.setName(newUser.getName());

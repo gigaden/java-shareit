@@ -3,9 +3,11 @@ package ru.practicum.shareit.item;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.exception.ValidationNullException;
+import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserService;
 
 import java.util.Collection;
@@ -13,97 +15,104 @@ import java.util.List;
 
 @Service("itemServiceImpl")
 @Slf4j
+@Transactional(readOnly = true)
 public class ItemServiceImpl implements ItemService {
-
-    @Qualifier("itemStorageImpl")
-    private final ItemStorage itemStorage;
 
     @Qualifier("userServiceImpl")
     private final UserService userService;
+    private final ItemRepository itemRepository;
 
-    public ItemServiceImpl(ItemStorage itemStorage, UserService userService) {
-        this.itemStorage = itemStorage;
+    public ItemServiceImpl(UserService userService, ItemRepository itemRepository) {
         this.userService = userService;
+        this.itemRepository = itemRepository;
     }
 
     @Override
-    public Collection<ItemDto> getAll() {
+    public Collection<Item> getAll() {
         log.info("Попытка получить все вещи.");
-        List<ItemDto> items = itemStorage.getAll().stream()
-                .map(ItemMapper::mapToItemDto).toList();
+        List<Item> items = itemRepository.findAll();
         log.info("Коллекция вещей успешно передана.");
         return items;
     }
 
     @Override
-    public Collection<ItemDto> getAllUserItems(long userId) {
+    public Collection<Item> getAllUserItems(long userId) {
         log.info("Получаем коллекцию всех вещей пользователя с id={}.", userId);
-        List<ItemDto> items = itemStorage.getAllUserItems(userId).stream()
-                .map(ItemMapper::mapToItemDto).toList();
+        List<Item> items = itemRepository.findAllByOwnerId(userId);
         log.info("Коллекция вещей пользователя с id={} успешно передана.", userId);
         return items;
     }
 
     @Override
-    public ItemDto get(long id) {
+    public Item get(long id) {
         log.info("Попытка получить вещь с id={}", id);
-        Item item = itemStorage.get(id)
+        Item item = itemRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(String.format("Вещь с id=%d не найдена", id)));
         log.info("Вещь с id = {} успешно передана.", id);
-        return ItemMapper.mapToItemDto(item);
+        return item;
     }
 
     @Override
+    @Transactional
     public Item create(ItemDto itemDto, long userId) {
         log.info("Попытка добавить вещь {}", itemDto.getName());
-        userService.get(userId);
+        User user = userService.get(userId);
         if (itemDto.getName() == null || itemDto.getName().isBlank()) {
             log.warn("Не указано имя вещи.");
             throw new ValidationNullException("Имя не может быть пустым.");
         }
-        Item item = itemStorage.create(ItemMapper.mapToItem(itemDto, userId));
+        Item item = itemRepository.save(ItemMapper.mapToItem(itemDto, user));
         log.info("Вещь с id={} успешно добавлена.", item.getId());
         return item;
     }
 
     @Override
+    @Transactional
     public Item update(Item newItem, long userId) {
         log.info("Попытка обновить вещь.");
         if (newItem.getId() == null) {
             log.warn("не указан Id вещи.");
             throw new ValidationNullException("Id вещи должен быть указан.");
         }
-        Item oldItem = itemStorage.get(newItem.getId())
+        Item oldItem = itemRepository.findById(newItem.getId())
                 .orElseThrow(() -> new NotFoundException(String.format("Вещь с id=%d не найдена", newItem.getId())));
         checkUserIsOwnerOfItem(oldItem.getOwner().getId(), userId);
-        Item item = itemStorage.update(newItem);
-        log.info("Вещь с id = {} успешно обновлена", item.getId());
-        return item;
+        oldItem.setName(newItem.getName());
+        oldItem.setDescription(newItem.getDescription());
+        oldItem.setOwner(newItem.getOwner());
+        oldItem.setAvailable(newItem.getAvailable());
+        itemRepository.save(oldItem);
+        log.info("Вещь с id = {} успешно обновлена", oldItem.getId());
+        return oldItem;
     }
 
     @Override
+    @Transactional
     public Item patch(long itemId, long userId, ItemDto itemDto) {
         log.info("Попытка обновить вещь через patch.");
-        Item oldItem = itemStorage.get(itemId)
+        Item oldItem = itemRepository.findById(itemId)
                 .orElseThrow(() -> new NotFoundException(String.format("Вещь с id=%d не найдена", itemId)));
         checkUserIsOwnerOfItem(oldItem.getOwner().getId(), userId);
-        Item item = itemStorage.patch(itemId, itemDto);
+        oldItem.setName(itemDto.getName() != null ? itemDto.getName() : oldItem.getName());
+        oldItem.setDescription(itemDto.getDescription() != null ? itemDto.getDescription() : oldItem.getDescription());
+        oldItem.setAvailable(itemDto.getAvailable() != null ? itemDto.getAvailable() : oldItem.getAvailable());
+        itemRepository.save(oldItem);
         log.info("Информация о вещи с id={} успешно обновлена.", itemId);
-        return item;
+        return oldItem;
 
     }
 
     @Override
-    public Collection<ItemDto> search(String text) {
+    public Collection<Item> search(String text) {
         log.info("Попытка найти вещи с текстом '{}'", text);
         if (text.isEmpty()) {
             log.warn("Не задан текст для поиска");
             return List.of();
         }
-        List<ItemDto> itemsDto = getAll().stream()
+        List<Item> itemsDto = getAll().stream()
                 .filter(i -> i.getDescription().toLowerCase().contains(text.toLowerCase()) ||
                         i.getName().toLowerCase().contains(text.toLowerCase()))
-                .filter(ItemDto::getAvailable)
+                .filter(Item::getAvailable)
                 .toList();
         if (itemsDto.isEmpty()) {
             log.info("Совпадений с текстом '{}' не найдено", text);
@@ -114,9 +123,10 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
+    @Transactional
     public void delete(long id) {
-        get(id);
-        itemStorage.delete(id);
+        Item item = get(id);
+        itemRepository.delete(item);
     }
 
     // Проверяем, что пользователь - собственник вещи.

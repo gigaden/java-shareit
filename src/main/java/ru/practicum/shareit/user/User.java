@@ -41,7 +41,7 @@ public class User {
     @NonNull
     private String email;
 
-    @OneToMany(mappedBy = "owner")
-    @JsonManagedReference
-    private List<Item> items;
+//    @OneToMany(mappedBy = "owner")
+//    @JsonManagedReference
+//    private List<Item> items;
 }

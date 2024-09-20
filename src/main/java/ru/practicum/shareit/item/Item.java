@@ -47,9 +47,9 @@ public class Item {
     @NonNull
     private Boolean available;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id")
-    @JsonBackReference
+    //@JsonBackReference
     private User owner;
     // private ItemRequest request;
 }

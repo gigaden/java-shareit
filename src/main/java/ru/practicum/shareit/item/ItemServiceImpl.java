@@ -109,17 +109,13 @@ public class ItemServiceImpl implements ItemService {
             log.warn("Не задан текст для поиска");
             return List.of();
         }
-        List<Item> itemsDto = getAll().stream()
-                .filter(i -> i.getDescription().toLowerCase().contains(text.toLowerCase()) ||
-                        i.getName().toLowerCase().contains(text.toLowerCase()))
-                .filter(Item::getAvailable)
-                .toList();
-        if (itemsDto.isEmpty()) {
+        List<Item> items = itemRepository.searchTextInNameOrDescription(text);
+        if (items.isEmpty()) {
             log.info("Совпадений с текстом '{}' не найдено", text);
-            return itemsDto;
+            return items;
         }
         log.info("Коллекция вещей с текстом '{}' успешно передана", text);
-        return itemsDto;
+        return items;
     }
 
     @Override

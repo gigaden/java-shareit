@@ -1,15 +1,15 @@
 package ru.practicum.shareit.user;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.EmailUniqueException;
 import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.exception.UserNotFoundException;
 import ru.practicum.shareit.exception.ValidationNullException;
+import ru.practicum.shareit.item.Item;
 
 import java.util.Collection;
-import java.util.stream.Collectors;
 
 @Service("userServiceImpl")
 @Slf4j
@@ -36,7 +36,7 @@ public class UserServiceImpl implements UserService {
     public User get(long id) {
         log.info("Попытка получить пользователя с id={}", id);
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException(String.format("Пользователь с id=%d не найден", id)));
+                .orElseThrow(() -> new UserNotFoundException(String.format("Пользователь с id=%d не найден", id)));
         log.info("Пользователь с id = {} успешно передан.", id);
         return user;
     }
@@ -94,5 +94,15 @@ public class UserServiceImpl implements UserService {
             log.warn("Email {} уже существует", email);
             throw new EmailUniqueException(String.format("Email %s уже существует", email));
         }
+    }
+
+    // Проверяем, что пользователь существует
+    @Override
+    public void checkUserIsExist(Long id) {
+        log.info("Проверяем существует ли пользователь с id={}", id);
+        if (userRepository.findById(id).isEmpty()) {
+            throw new UserNotFoundException(String.format("Пользователь с id=%d не найден", id));
+        }
+        log.info("Пользователь с id = {} существует.", id);
     }
 }

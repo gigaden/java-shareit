@@ -25,8 +25,16 @@ public class ErrorHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.FORBIDDEN)
+    public HashMap<String, String> handleUserNotFound(final UserNotFoundException e, WebRequest request) {
+        log.error("Ошибка 403 NotFoundException: {} в запросе {}",
+                e.getMessage(), request.getDescription(false));
+        return buildErrorResponse(e.getMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.FORBIDDEN)
     public HashMap<String, String> handleValidation(final ValidationException e, WebRequest request) {
-        log.error("Ошибка 400 ValidationException: {} в запросе {}",
+        log.error("Ошибка 403 ValidationException: {} в запросе {}",
                 e.getMessage(), request.getDescription(false));
         return buildErrorResponse(e.getMessage());
     }
@@ -48,10 +56,27 @@ public class ErrorHandler {
         return new ErrorResponse(e.getMessage());
     }
 
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler
+    public ErrorResponse handleBookingValidateException(final BookingValidateException e,
+                                                               WebRequest request) {
+        log.error("Ошибка 400 BookingValidateException: {} в запросе {}",
+                e.getMessage(), request.getDescription(false));
+        return new ErrorResponse(e.getMessage());
+    }
+
     @ExceptionHandler
     @ResponseStatus(HttpStatus.CONFLICT)
     public HashMap<String, String> handleEmailUniqueException(final EmailUniqueException e, WebRequest request) {
         log.error("Ошибка 409 EmailUniqueException: {} в запросе {}", e.getMessage(),
+                request.getDescription(false));
+        return buildErrorResponse(e.getMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public HashMap<String, String> handleBookingAccessException(final BookingAccessException e, WebRequest request) {
+        log.error("Ошибка 401 BookingAccessException: {} в запросе {}", e.getMessage(),
                 request.getDescription(false));
         return buildErrorResponse(e.getMessage());
     }

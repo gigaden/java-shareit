@@ -15,4 +15,6 @@ public interface UserService {
     User patch(long userId, UserDto userDto);
 
     void delete(long id);
+
+    void checkUserIsExist(Long id);
 }

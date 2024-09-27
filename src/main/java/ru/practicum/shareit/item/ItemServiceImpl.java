@@ -1,17 +1,14 @@
 package ru.practicum.shareit.item;
 
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.BookingRepository;
-import ru.practicum.shareit.booking.BookingService;
 import ru.practicum.shareit.exception.BookingValidateException;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.exception.UserNotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.exception.ValidationNullException;
 import ru.practicum.shareit.user.User;
@@ -56,7 +53,7 @@ public class ItemServiceImpl implements ItemService {
         log.info("Получаем коллекцию всех вещей пользователя с id={}.", userId);
         List<Item> items = itemRepository.findAllByOwnerId(userId);
         List<ItemBookingsDto> itemBookingsDtos = new ArrayList<>();
-        for (Item item: items) {
+        for (Item item : items) {
             List<Booking> bookings = bookingRepository.findAllByItemIdOrderByStart(item.getId(), Limit.of(2));
             Collection<Comment> comments = getComments(item.getId());
             ItemBookingsDto itemBookingsDto = ItemMapper.mapToItemBookingDto(item, bookings, comments);

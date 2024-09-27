@@ -1,6 +1,5 @@
 package ru.practicum.shareit.item;
 
-import org.hibernate.sql.ast.tree.expression.Collation;
 import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.user.User;
 

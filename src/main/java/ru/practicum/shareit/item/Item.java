@@ -50,7 +50,6 @@ public class Item {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "owner_id", nullable = false)
-    //@JsonBackReference
     private User owner;
 
 

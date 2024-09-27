@@ -1,5 +1,9 @@
 package ru.practicum.shareit.user;
 
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestHeader;
+import ru.practicum.shareit.item.CommentDto;
+
 import java.util.Collection;
 
 public interface UserService {

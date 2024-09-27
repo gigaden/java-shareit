@@ -6,9 +6,11 @@ public interface ItemService {
 
     Collection<Item> getAll();
 
-    Collection<Item> getAllUserItems(long userId);
+    Collection<ItemBookingsDto> getAllUserItems(Long userId);
 
-    Item get(long id);
+    ItemBookingsDto get(Long id);
+
+    Item getById(Long id);
 
     Item create(ItemDto itemDto, long userId);
 
@@ -19,4 +21,6 @@ public interface ItemService {
     Collection<Item> search(String text);
 
     void delete(long id);
+
+    Comment addComment(Long userId, Long itemId, Comment comment);
 }

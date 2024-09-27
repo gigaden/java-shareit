@@ -32,15 +32,14 @@ public class ItemController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public Collection<ItemDto> getAll(@RequestHeader("X-Sharer-User-Id") long userId) {
-        return itemService.getAllUserItems(userId).stream()
-                .map(ItemMapper::mapToItemDto).toList();
+    public Collection<ItemBookingsDto> getAll(@RequestHeader("X-Sharer-User-Id") long userId) {
+        return itemService.getAllUserItems(userId);
     }
 
     @GetMapping("/{itemId}")
     @ResponseStatus(HttpStatus.OK)
-    public ItemDto get(@PathVariable long itemId) {
-        return ItemMapper.mapToItemDto(itemService.get(itemId));
+    public ItemBookingsDto get(@PathVariable long itemId) {
+        return itemService.get(itemId);
     }
 
     @PostMapping
@@ -76,6 +75,14 @@ public class ItemController {
     @ResponseStatus(HttpStatus.OK)
     public void delete(@PathVariable long itemId) {
         itemService.delete(itemId);
+    }
+
+    @PostMapping("/{itemId}/comment")
+    @ResponseStatus(HttpStatus.CREATED)
+    public CommentDto addComment(@RequestHeader("X-Sharer-User-Id") Long userId,
+                              @PathVariable Long itemId,
+                              @Valid @RequestBody Comment comment) {
+        return CommentMapper.mapToItemDto(itemService.addComment(userId, itemId, comment));
     }
 
 

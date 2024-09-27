@@ -24,9 +24,9 @@ public class ErrorHandler {
     }
 
     @ExceptionHandler
-    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     public HashMap<String, String> handleUserNotFound(final UserNotFoundException e, WebRequest request) {
-        log.error("Ошибка 403 NotFoundException: {} в запросе {}",
+        log.error("Ошибка 404 NotFoundException: {} в запросе {}",
                 e.getMessage(), request.getDescription(false));
         return buildErrorResponse(e.getMessage());
     }

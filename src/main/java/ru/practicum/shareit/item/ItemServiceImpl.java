@@ -1,17 +1,27 @@
 package ru.practicum.shareit.item;
 
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.booking.Booking;
+import ru.practicum.shareit.booking.BookingRepository;
+import ru.practicum.shareit.booking.BookingService;
+import ru.practicum.shareit.exception.BookingValidateException;
 import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.exception.UserNotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.exception.ValidationNullException;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserService;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 @Service("itemServiceImpl")
 @Slf4j
@@ -21,10 +31,15 @@ public class ItemServiceImpl implements ItemService {
     @Qualifier("userServiceImpl")
     private final UserService userService;
     private final ItemRepository itemRepository;
+    private final BookingRepository bookingRepository;
+    private final CommentRepository commentRepository;
 
-    public ItemServiceImpl(UserService userService, ItemRepository itemRepository) {
+    public ItemServiceImpl(UserService userService, ItemRepository itemRepository,
+                           BookingRepository bookingRepository, CommentRepository commentRepository) {
         this.userService = userService;
         this.itemRepository = itemRepository;
+        this.bookingRepository = bookingRepository;
+        this.commentRepository = commentRepository;
     }
 
     @Override
@@ -36,15 +51,47 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public Collection<Item> getAllUserItems(long userId) {
+    public Collection<ItemBookingsDto> getAllUserItems(Long userId) {
+        userService.checkUserIsExist(userId);
         log.info("Получаем коллекцию всех вещей пользователя с id={}.", userId);
         List<Item> items = itemRepository.findAllByOwnerId(userId);
+        List<ItemBookingsDto> itemBookingsDtos = new ArrayList<>();
+        for (Item item: items) {
+            List<Booking> bookings = bookingRepository.findAllByItemIdOrderByStart(item.getId(), Limit.of(2));
+            Collection<Comment> comments = getComments(item.getId());
+            ItemBookingsDto itemBookingsDto = ItemMapper.mapToItemBookingDto(item, bookings, comments);
+            itemBookingsDtos.add(itemBookingsDto);
+        }
         log.info("Коллекция вещей пользователя с id={} успешно передана.", userId);
-        return items;
+        return itemBookingsDtos;
+    }
+
+    public Collection<Comment> getComments(Long itemId) {
+        log.info("Попытка получить все комментарии по вещи id = {}.", itemId);
+        checkItemIsExist(itemId);
+        List<Comment> comments = commentRepository.findAllByItemId(itemId);
+        if (comments.isEmpty()) {
+            log.info("Комментарии по вещи id = {} отсутствуют", itemId);
+            return comments;
+        }
+        log.info("Комментарии по вещи id = {} успешно переданы.", itemId);
+        return comments;
     }
 
     @Override
-    public Item get(long id) {
+    public ItemBookingsDto get(Long id) {
+        log.info("Попытка получить вещь с id={}", id);
+        Item item = itemRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(String.format("Вещь с id=%d не найдена", id)));
+        List<Booking> bookings = bookingRepository.findAllByItemIdOrderByStart(item.getId(), Limit.of(2));
+        Collection<Comment> comments = getComments(id);
+        ItemBookingsDto itemBookingsDto = ItemMapper.mapToItemBookingDto(item, bookings, comments);
+        log.info("Вещь с id = {} успешно передана.", id);
+        return itemBookingsDto;
+    }
+
+    @Override
+    public Item getById(Long id) {
         log.info("Попытка получить вещь с id={}", id);
         Item item = itemRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(String.format("Вещь с id=%d не найдена", id)));
@@ -121,8 +168,30 @@ public class ItemServiceImpl implements ItemService {
     @Override
     @Transactional
     public void delete(long id) {
-        Item item = get(id);
-        itemRepository.delete(item);
+        checkItemIsExist(id);
+        itemRepository.deleteById(id);
+    }
+
+    @Override
+    @Transactional
+    public Comment addComment(Long userId, Long itemId, Comment comment) {
+        log.info("Попытка пользователя id = {} добавить отзыв вещи id = {}.", userId, itemId);
+        User user = userService.get(userId);
+        Item item = getById(itemId);
+        Optional<Booking> booking = bookingRepository.findBookingByItemIdAndBookerId(itemId, userId);
+        if (booking.isEmpty()) {
+            log.warn("Пользователь id = {} не брал в аренду вещь id = {}", userId, itemId);
+            throw new ValidationException("Оставить отзыв можно только по вещи, которую вы брали в аренду.");
+        }
+        if (booking.get().getEnd().isAfter(LocalDateTime.now().minusSeconds(1))) {
+            log.warn("Пользователь id = {} ещё не закончил аренду вещи id = {}", userId, itemId);
+            throw new BookingValidateException("Оставить отзыв можно только после окончания аренды.");
+        }
+        comment.setItem(item);
+        comment.setAuthorName(user);
+        commentRepository.save(comment);
+        log.info("Отзыв пользователя id = {} для вещи id = {} успешно добавлен", userId, itemId);
+        return comment;
     }
 
     // Проверяем, что пользователь - собственник вещи.
@@ -131,5 +200,14 @@ public class ItemServiceImpl implements ItemService {
             log.warn("не совпадают id пользователя и собственника вещи.");
             throw new ValidationException("Нельзя изменить чужую вещь.");
         }
+    }
+
+    // Проверяем, что вещь существует
+    public void checkItemIsExist(Long id) {
+        log.info("Проверяем существует ли вещь с id={}", id);
+        if (itemRepository.findById(id).isEmpty()) {
+            throw new NotFoundException(String.format("Вещь с id=%d не найдена", id));
+        }
+        log.info("Вещь с id = {} существует.", id);
     }
 }

@@ -1,10 +1,12 @@
 package ru.practicum.shareit.booking;
 
+import org.springframework.data.domain.Limit;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface BookingRepository extends JpaRepository<Booking, Long> {
 
@@ -28,4 +30,8 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Booking> findBookingByItemOwnerIdAndStartIsAfter(Long id, LocalDateTime localDateTime, Sort sort);
 
     List<Booking> findBookingByItemOwnerIdAndEndIsAfter(Long id, LocalDateTime localDateTime, Sort sort);
+
+    List<Booking> findAllByItemIdOrderByStart(Long itemId, Limit limit);
+
+    Optional<Booking> findBookingByItemIdAndBookerId(Long itemId, Long userId);
 }

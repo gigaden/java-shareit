@@ -19,30 +19,14 @@ import ru.practicum.shareit.user.User;
 
 import java.time.LocalDateTime;
 
-@Entity
-@Table(name = "comments")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Comment {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class CommentDto {
     private Long id;
-
-    @Column(name = "text")
-    @NonNull
     private String text;
-
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "item_id", nullable = false)
     private Item item;
-
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "author_id", nullable = false)
-    private User authorName;
-
-    @Column(name = "created")
-    private LocalDateTime created = LocalDateTime.now();
+    private String authorName;
+    private LocalDateTime created;
 }

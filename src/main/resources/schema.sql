@@ -1,4 +1,4 @@
-DROP TABLE bookings;
+DROP TABLE if exists bookings;
 
 CREATE TABLE IF NOT EXISTS users
 (

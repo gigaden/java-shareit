@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.BookingAccessException;
-import ru.practicum.shareit.exception.BookingValidateException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.UserNotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
@@ -98,10 +97,11 @@ public class BookingServiceImpl implements BookingService {
         log.info("Попытка забронировать вещь с id = {}", bookingDto.getItemId());
         User booker = userService.get(userId);
         Item item = itemService.getById(bookingDto.getItemId());
-        checkItemIsAvailableForBooking(item);
+        BookingValidator.checkItemIsAvailableForBooking(item);
+        checkDatesAreCrossing(bookingDto.getStart(), bookingDto.getEnd(), item.getId());
         Booking booking = BookingMapper.mapDtoToBooking(bookingDto, booker, item);
         booking.setStatus(BookingStatus.WAITING);
-        checkBookingsDates(booking);
+        BookingValidator.checkBookingsDates(booking);
         bookingRepository.save(booking);
         log.info("Вещь {} с id={} успешно забронирована.", item.getName(), item.getId());
         return booking;
@@ -133,32 +133,15 @@ public class BookingServiceImpl implements BookingService {
 
     }
 
-    // Проверяем, корректность дат для бронирования.
-    public void checkBookingsDates(Booking booking) {
-        LocalDateTime date = LocalDateTime.now();
-        if (booking.getStart().equals(booking.getEnd())) {
-            log.warn("Совпадают даты начала и окончания бронирования.");
-            throw new BookingValidateException("Дата начала и окончания бронирования не должны совпадать.");
-        } else if (booking.getStart().isEqual(date)) {
-            log.warn("Время начала бронирования равно текущему моменту.");
-            throw new BookingValidateException("Время начала бронирования не должно быть в прошлом.");
-        } else if (booking.getEnd().isBefore(date.minusSeconds(30))) {
-            log.warn("Время окончания бронирования раньше текущего момента.");
-            throw new BookingValidateException("Время окончания бронирования не должно быть в прошлом.");
-        } else if (booking.getEnd().isBefore(booking.getStart())) {
-            log.warn("Начало бронирования позже окончания.");
-            throw new BookingValidateException("Время начала бронирования не должно быть позже окончания.");
-        } //else if (booking.getStart().isBefore(date.plusMinutes(timeForBooking))) {
-//            log.warn("Начало бронирования равно текущему времени.");
-//            throw new BookingValidateException("Время начала бронирования не должно быть равно текущему моменту.");
-//        }
-    }
 
-    // Проверяем, что вещь доступна для бронирования.
-    public void checkItemIsAvailableForBooking(Item item) {
-        if (!item.getAvailable()) {
-            log.warn("Вещь с id = {} недоступна для бронирования.", item.getId());
-            throw new BookingValidateException("Собственник запретил бронирование вещи.");
+    // Проверяем пересечение даты бронирований
+    public void checkDatesAreCrossing(LocalDateTime start, LocalDateTime end, Long itemId) {
+        List<Booking> crossBookings = bookingRepository.findAllCrossingsDates(start,
+                end, itemId);
+        if (!crossBookings.isEmpty()) {
+            log.warn("Даты существующих бронирований {} пересекаются с указанными {} {}", crossBookings,
+                    start, end);
+            throw new ValidationException("В системе уже есть бронирования, даты которых пересекаются с указанными.");
         }
     }
 }

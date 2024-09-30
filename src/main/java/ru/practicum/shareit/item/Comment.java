@@ -1,9 +1,7 @@
-package ru.practicum.shareit.booking;
+package ru.practicum.shareit.item;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -15,40 +13,35 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.ColumnTransformer;
-import ru.practicum.shareit.item.Item;
+import lombok.NonNull;
 import ru.practicum.shareit.user.User;
 
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "bookings")
+@Table(name = "comments")
 @Data
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Booking {
+@Builder
+public class Comment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "start_date")
-    private LocalDateTime start;
-
-    @Column(name = "end_date")
-    private LocalDateTime end;
+    @Column(name = "text")
+    @NonNull
+    private String text;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "item_id")
+    @JoinColumn(name = "item_id", nullable = false)
     private Item item;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "booker_id")
-    private User booker;
+    @JoinColumn(name = "author_id", nullable = false)
+    private User authorName;
 
-    @Column(name = "status")
-    @Enumerated(EnumType.STRING)
-    @ColumnTransformer(write = "?::booking_status")
-    private BookingStatus status = BookingStatus.WAITING;
+    @Column(name = "created")
+    private LocalDateTime created = LocalDateTime.now();
 }

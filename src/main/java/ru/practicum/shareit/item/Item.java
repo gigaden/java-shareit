@@ -49,8 +49,7 @@ public class Item {
     @JoinColumn(name = "owner_id", nullable = false)
     private User owner;
 
-
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "request_id")
     private Request request;
 }

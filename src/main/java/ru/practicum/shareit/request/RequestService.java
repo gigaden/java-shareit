@@ -8,8 +8,8 @@ public interface RequestService {
 
     Collection<Request> get(Long userId);
 
-    Collection<Request> getAll();
+    Collection<Request> getAll(Long userId);
 
-    Request getOne(Long requestId);
+    Request getOne(Long userId, Long requestId);
 
 }

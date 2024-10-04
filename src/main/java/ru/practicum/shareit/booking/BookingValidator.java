@@ -37,8 +37,4 @@ public class BookingValidator {
             throw new BookingValidateException("Собственник запретил бронирование вещи.");
         }
     }
-
-    public static void checkDatesIsCrossing() {
-
-    }
 }

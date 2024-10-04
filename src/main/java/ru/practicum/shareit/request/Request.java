@@ -16,6 +16,8 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import ru.practicum.shareit.user.User;
 
+import java.time.LocalDateTime;
+
 
 @Entity
 @Table(name = "requests")
@@ -33,7 +35,10 @@ public class Request {
     @NonNull
     private String description;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @Column(name = "create_date")
+    private LocalDateTime created = LocalDateTime.now();
+
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "requestor_id")
     private User requestor;
 

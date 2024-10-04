@@ -16,6 +16,7 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import ru.practicum.shareit.user.User;
 
+
 @Entity
 @Table(name = "requests")
 @Data

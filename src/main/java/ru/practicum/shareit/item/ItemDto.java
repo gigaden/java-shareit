@@ -18,6 +18,6 @@ public class ItemDto {
     private String description;
     private Boolean available;
     private Collection<Comment> comments;
-    private long request;
+    private long requestId;
 
 }

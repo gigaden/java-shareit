@@ -11,6 +11,7 @@ import ru.practicum.shareit.exception.BookingValidateException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.exception.ValidationNullException;
+import ru.practicum.shareit.request.RequestService;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserService;
 
@@ -30,13 +31,16 @@ public class ItemServiceImpl implements ItemService {
     private final ItemRepository itemRepository;
     private final BookingRepository bookingRepository;
     private final CommentRepository commentRepository;
+    private final RequestService requestService;
 
     public ItemServiceImpl(UserService userService, ItemRepository itemRepository,
-                           BookingRepository bookingRepository, CommentRepository commentRepository) {
+                           BookingRepository bookingRepository, CommentRepository commentRepository,
+                           RequestService requestService) {
         this.userService = userService;
         this.itemRepository = itemRepository;
         this.bookingRepository = bookingRepository;
         this.commentRepository = commentRepository;
+        this.requestService = requestService;
     }
 
     @Override
@@ -105,6 +109,7 @@ public class ItemServiceImpl implements ItemService {
             log.warn("Не указано имя вещи.");
             throw new ValidationNullException("Имя не может быть пустым.");
         }
+        if (itemDto.getRequestId() != 0) requestService.checkRequestIsExist(itemDto.getRequestId());
         Item item = itemRepository.save(ItemMapper.mapToItem(itemDto, user));
         log.info("Вещь с id={} успешно добавлена.", item.getId());
         return item;

@@ -6,10 +6,12 @@ public interface RequestService {
 
     Request create(Long userId, Request request);
 
-    Collection<Request> get(Long userId);
+    Collection<RequestDto> get(Long userId);
 
-    Collection<Request> getAll(Long userId);
+    Collection<RequestDto> getAll(Long userId);
 
-    Request getOne(Long userId, Long requestId);
+    RequestDto getOne(Long userId, Long requestId);
+
+    void checkRequestIsExist(Long requestId);
 
 }

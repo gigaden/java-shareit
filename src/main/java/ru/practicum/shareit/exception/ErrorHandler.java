@@ -41,10 +41,10 @@ public class ErrorHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleValidationNull(final ValidationNullException e, WebRequest request) {
+    public HashMap<String, String> handleValidationNull(final ValidationNullException e, WebRequest request) {
         log.error("Ошибка 400 ValidationNullException: {} в запросе {}",
                 e.getMessage(), request.getDescription(false));
-        return new ErrorResponse(e.getMessage());
+        return buildErrorResponse(e.getMessage());
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -59,7 +59,7 @@ public class ErrorHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler
     public ErrorResponse handleBookingValidateException(final BookingValidateException e,
-                                                               WebRequest request) {
+                                                        WebRequest request) {
         log.error("Ошибка 400 BookingValidateException: {} в запросе {}",
                 e.getMessage(), request.getDescription(false));
         return new ErrorResponse(e.getMessage());
@@ -83,10 +83,10 @@ public class ErrorHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ErrorResponse handleOtherExc(final Throwable e, WebRequest request) {
+    public HashMap<String, String> handleOtherExc(final Throwable e, WebRequest request) {
         log.error("Ошибка 500: {} в запросе {}", e.getMessage(),
                 request.getDescription(false));
-        return new ErrorResponse(e.getMessage());
+        return buildErrorResponse(e.getMessage());
     }
 
     public HashMap<String, String> buildErrorResponse(String message) {

@@ -31,20 +31,20 @@ public class RequestController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public Collection<Request> get(@RequestHeader("X-Sharer-User-Id") long userId) {
+    public Collection<RequestDto> get(@RequestHeader("X-Sharer-User-Id") long userId) {
         return requestService.get(userId);
     }
 
     @GetMapping("/all")
     @ResponseStatus(HttpStatus.OK)
-    public Collection<Request> getAll(@RequestHeader("X-Sharer-User-Id") long userId) {
+    public Collection<RequestDto> getAll(@RequestHeader("X-Sharer-User-Id") long userId) {
         return requestService.getAll(userId);
     }
 
     @GetMapping("/{requestId}")
     @ResponseStatus(HttpStatus.OK)
-    public Request getOne(@RequestHeader("X-Sharer-User-Id") long userId,
-                                      @PathVariable Long requestId ) {
+    public RequestDto getOne(@RequestHeader("X-Sharer-User-Id") long userId,
+                             @PathVariable Long requestId) {
         return requestService.getOne(userId, requestId);
     }
 

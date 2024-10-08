@@ -15,7 +15,7 @@ import java.util.Map;
 
 @Service
 public class UserClient extends BaseClient {
-    private static final String API_PREFIX = "/bookings";
+    private static final String API_PREFIX = "/users";
 
     @Autowired
     public UserClient(@Value("${shareit-server.url}") String serverUrl, RestTemplateBuilder builder) {
@@ -43,5 +43,29 @@ public class UserClient extends BaseClient {
 
     public ResponseEntity<Object> getBooking(long userId, Long bookingId) {
         return get("/" + bookingId, userId);
+    }
+
+    public ResponseEntity<Object> getAll() {
+        return get("");
+    }
+
+    public ResponseEntity<Object> get(long userId) {
+        return get("/" + userId);
+    }
+
+    public ResponseEntity<Object> create(UserDto userDto) {
+        return post("", userDto);
+    }
+
+    public ResponseEntity<Object> update(UserDto userDto) {
+        return put("",userDto);
+    }
+
+    public ResponseEntity<Object> patch(long userId, UserDto userDto) {
+        return patch("/" + userId, userDto);
+    }
+
+    public ResponseEntity<Object> delete(long userId) {
+        return delete("/" + userId);
     }
 }

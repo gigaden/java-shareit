@@ -1,14 +1,17 @@
 package ru.practicum.shareit.user;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Builder;
-import lombok.Data;
+import jakarta.validation.constraints.Email;
+import lombok.*;
 
-@Data
-@Builder
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
 public class UserDto {
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long id;
+    @NonNull
     private String name;
+    @Email
+    @NonNull
     private String email;
 }

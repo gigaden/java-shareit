@@ -7,7 +7,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.DefaultUriBuilderFactory;
-import ru.practicum.shareit.booking.dto.BookingState;
 import ru.practicum.shareit.client.BaseClient;
 
 import java.util.Map;
@@ -26,41 +25,36 @@ public class ItemClient extends BaseClient {
         );
     }
 
-    public ResponseEntity<Object> getBookings(long userId, BookingState state, Integer from, Integer size) {
-        Map<String, Object> parameters = Map.of(
-                "state", state.name(),
-                "from", from,
-                "size", size
-        );
-        return get("?state={state}&from={from}&size={size}", userId, parameters);
-    }
-
-    public ResponseEntity<Object> getAll() {
-        return get("");
+    public ResponseEntity<Object> getAll(long userId) {
+        return get("", userId);
     }
 
     public ResponseEntity<Object> get(long itemId) {
         return get("/" + itemId);
     }
 
-    public ResponseEntity<Object> create(ItemDto itemDto) {
-        return post("", itemDto);
+    public ResponseEntity<Object> create(long userId, ItemDto itemDto) {
+        return post("", userId, itemDto);
     }
 
-    public ResponseEntity<Object> update(ItemDto itemDto) {
-        return put("", itemDto);
+    public ResponseEntity<Object> update(long userId, ItemDto itemDto) {
+        return put("", userId, itemDto);
     }
 
-    public ResponseEntity<Object> patch(long itemId, ItemDto itemDto) {
-        return patch("/" + itemId, itemDto);
+    public ResponseEntity<Object> patch(long userId, long itemId, ItemDto itemDto) {
+        return patch("/" + itemId, userId, itemDto);
     }
 
-    public ResponseEntity<Object> search(long itemId, ItemDto itemDto) {
-        return patch("/" + itemId, itemDto);
+
+    public ResponseEntity<Object> search(String text) {
+        Map<String, Object> parameters = Map.of(
+                "text", text
+        );
+        return get("/search?text={text}", null, parameters);
     }
 
-    public ResponseEntity<Object> addComment(long itemId, ItemDto itemDto) {
-        return patch("/" + itemId, itemDto);
+    public ResponseEntity<Object> addComment(long itemId, long userId, CommentDto commentDto) {
+        return post("/" + itemId + "/comment", userId, commentDto);
     }
 
     public ResponseEntity<Object> delete(long itemId) {

@@ -45,14 +45,14 @@ public class ItemController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public Item create(@RequestHeader("X-Sharer-User-Id") long userId,
-                       @Valid @RequestBody ItemDto itemDto) {
+                       @RequestBody ItemDto itemDto) {
         return itemService.create(itemDto, userId);
     }
 
     @PutMapping
     @ResponseStatus(HttpStatus.OK)
     public Item update(@RequestHeader("X-Sharer-User-Id") long userId,
-                       @Valid @RequestBody Item item) {
+                       @RequestBody Item item) {
         return itemService.update(item, userId);
     }
 
@@ -60,7 +60,7 @@ public class ItemController {
     @ResponseStatus(HttpStatus.OK)
     public Item patch(@RequestHeader("X-Sharer-User-Id") long userId,
                       @PathVariable long itemId,
-                      @Valid @RequestBody ItemDto itemDto) {
+                      @RequestBody ItemDto itemDto) {
         return itemService.patch(itemId, userId, itemDto);
     }
 
@@ -81,7 +81,7 @@ public class ItemController {
     @ResponseStatus(HttpStatus.CREATED)
     public CommentDto addComment(@RequestHeader("X-Sharer-User-Id") Long userId,
                               @PathVariable Long itemId,
-                              @Valid @RequestBody Comment comment) {
+                              @RequestBody Comment comment) {
         return CommentMapper.mapToItemDto(itemService.addComment(userId, itemId, comment));
     }
 

@@ -24,7 +24,7 @@ public class RequestController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public Request create(@RequestHeader("X-Sharer-User-Id") long userId,
-                          @Valid @RequestBody Request request) {
+                          @RequestBody Request request) {
         return requestService.create(userId, request);
 
     }

@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.exception.ValidationNullException;
 
 
 @Controller
@@ -40,6 +41,7 @@ public class UserController {
     @PutMapping
     public ResponseEntity<Object> update(@Valid @RequestBody UserDto userDto) {
         log.info("Update user ={}", userDto);
+        checkUser(userDto);
         return userClient.update(userDto);
     }
 
@@ -53,5 +55,12 @@ public class UserController {
     public ResponseEntity<Object> delete(@PathVariable long userId) {
         log.info("Delete user, userId={}", userId);
         return userClient.delete(userId);
+    }
+
+    public void checkUser(UserDto userDto) {
+        if (userDto.getId() == null) {
+            log.warn("не указан Id пользователя.");
+            throw new ValidationNullException("Id должен быть указан.");
+        }
     }
 }

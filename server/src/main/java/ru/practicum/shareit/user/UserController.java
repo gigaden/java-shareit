@@ -45,13 +45,13 @@ public class UserController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public User create(@Valid @RequestBody User user) {
+    public User create(@RequestBody User user) {
         return userService.create(user);
     }
 
     @PutMapping
     @ResponseStatus(HttpStatus.OK)
-    public User update(@Valid @RequestBody User user) {
+    public User update(@RequestBody User user) {
         return userService.update(user);
     }
 

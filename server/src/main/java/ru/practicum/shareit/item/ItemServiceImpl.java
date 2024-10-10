@@ -105,10 +105,6 @@ public class ItemServiceImpl implements ItemService {
     public Item create(ItemDto itemDto, long userId) {
         log.info("Попытка добавить вещь {}", itemDto.getName());
         User user = userService.get(userId);
-        if (itemDto.getName() == null || itemDto.getName().isBlank()) {
-            log.warn("Не указано имя вещи.");
-            throw new ValidationNullException("Имя не может быть пустым.");
-        }
         if (itemDto.getRequestId() != 0) requestService.checkRequestIsExist(itemDto.getRequestId());
         Item item = itemRepository.save(ItemMapper.mapToItem(itemDto, user));
         log.info("Вещь с id={} успешно добавлена.", item.getId());

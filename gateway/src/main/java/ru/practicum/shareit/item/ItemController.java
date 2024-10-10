@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import ru.practicum.shareit.exception.ValidationNullException;
 
 
 @Controller
@@ -42,6 +43,7 @@ public class ItemController {
     public ResponseEntity<Object> create(@RequestHeader("X-Sharer-User-Id") long userId,
                                          @Valid @RequestBody ItemDto itemDto) {
         log.info("Create item, item={}", itemDto);
+        checkItemName(itemDto);
         return itemClient.create(userId, itemDto);
     }
 
@@ -49,6 +51,7 @@ public class ItemController {
     public ResponseEntity<Object> update(@RequestHeader("X-Sharer-User-Id") long userId,
                                          @Valid @RequestBody ItemDto itemDto) {
         log.info("Update item={}", itemDto);
+        checkItemId(itemDto);
         return itemClient.update(userId, itemDto);
     }
 
@@ -57,6 +60,7 @@ public class ItemController {
                                         @PathVariable long itemId,
                                         @Valid @RequestBody ItemDto itemDto) {
         log.info("Patch item={}", itemDto);
+        checkItemId(itemDto);
         return itemClient.patch(userId, itemId, itemDto);
     }
 
@@ -78,6 +82,20 @@ public class ItemController {
                                              @Valid @RequestBody CommentDto commentDto) {
         log.info("Add comment={}", commentDto);
         return itemClient.addComment(itemId, userId, commentDto);
+    }
+
+    public void checkItemId(ItemDto itemDto) {
+        if (itemDto.getId() == null) {
+            log.warn("не указан Id вещи.");
+            throw new ValidationNullException("Id вещи должен быть указан.");
+        }
+    }
+
+    public void checkItemName(ItemDto itemDto) {
+        if (itemDto.getName() == null || itemDto.getName().isBlank()) {
+            log.warn("Не указано имя вещи.");
+            throw new ValidationNullException("Имя не может быть пустым.");
+        }
     }
 
 

@@ -59,9 +59,8 @@ public class UserServiceImpl implements UserService {
         User oldUser = get(newUser.getId());
         oldUser.setName(newUser.getName());
         oldUser.setEmail(newUser.getEmail());
-        User user = userRepository.save(oldUser);
-        log.info("Пользователь с id = {} успешно обновлён", user.getId());
-        return user;
+        log.info("Пользователь с id = {} успешно обновлён", oldUser.getId());
+        return userRepository.save(oldUser);
     }
 
     @Override
@@ -87,11 +86,13 @@ public class UserServiceImpl implements UserService {
     }
 
     // Проверяем уникальность email
-    private void emailIsUnique(String email) {
+    public void emailIsUnique(String email) {
+        log.info("Проверяем уникальность email={}", email);
         if (!getAll().stream().filter(i -> i.getEmail().equals(email)).toList().isEmpty()) {
             log.warn("Email {} уже существует", email);
             throw new EmailUniqueException(String.format("Email %s уже существует", email));
         }
+        log.info("Email={} уникален", email);
     }
 
     // Проверяем, что пользователь существует

@@ -1,9 +1,0 @@
-ru/practicum/shareit/request/RequestMapper.class
-ru/practicum/shareit/request/RequestDto.class
-ru/practicum/shareit/exception/ErrorHandler.class
-ru/practicum/shareit/item/Item.class
-ru/practicum/shareit/request/RequestServiceImpl.class
-ru/practicum/shareit/item/Item$ItemBuilder.class
-ru/practicum/shareit/request/RequestDto$RequestDtoBuilder.class
-ru/practicum/shareit/request/RequestRepository.class
-ru/practicum/shareit/request/RequestController.class

@@ -1,19 +1,9 @@
 package ru.practicum.shareit.booking;
 
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -40,7 +30,7 @@ public class BookingController {
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public List<BookingDto> getAll(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                @RequestParam(defaultValue = "ALL") BookingState state) {
+                                   @RequestParam(defaultValue = "ALL") BookingState state) {
         return bookingService.getAll(userId, state).stream()
                 .map(BookingMapper::mapToBookingDto).toList();
     }
@@ -49,7 +39,7 @@ public class BookingController {
     @GetMapping("/owner")
     @ResponseStatus(HttpStatus.OK)
     public List<BookingDto> getOwnersBooking(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                       @RequestParam(defaultValue = "ALL") BookingState state) {
+                                             @RequestParam(defaultValue = "ALL") BookingState state) {
         return bookingService.getOwnersBooking(userId, state).stream()
                 .map(BookingMapper::mapToBookingDto).toList();
     }
@@ -58,7 +48,7 @@ public class BookingController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public BookingDto create(@RequestHeader("X-Sharer-User-Id") long userId,
-                          @RequestBody BookingCreateDto booking) {
+                             @RequestBody BookingCreateDto booking) {
         return BookingMapper.mapToBookingDto(bookingService.create(userId, booking));
     }
 
@@ -66,8 +56,8 @@ public class BookingController {
     @PatchMapping("/{bookingId}")
     @ResponseStatus(HttpStatus.OK)
     public BookingDto changeBookingRequestStatus(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                              @PathVariable Long bookingId,
-                                              @RequestParam boolean approved) {
+                                                 @PathVariable Long bookingId,
+                                                 @RequestParam boolean approved) {
         return BookingMapper.mapToBookingDto(bookingService.changeBookingRequestStatus(userId, bookingId, approved));
 
 

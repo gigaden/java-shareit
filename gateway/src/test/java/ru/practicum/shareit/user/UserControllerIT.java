@@ -8,23 +8,21 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.aot.DisabledInAotMode;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MockMvcBuilder;
-import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.nio.charset.StandardCharsets;
 
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.hamcrest.Matchers.is;
 
 @WebMvcTest(controllers = UserController.class)
+@DisabledInAotMode
 class UserControllerIT {
 
     @Autowired
@@ -60,7 +58,7 @@ class UserControllerIT {
 
     @Test
     void save_NewUserWhenUserEmailIsWrongThenBadGateway() throws Exception {
-        ReflectionTestUtils.setField(user, "email","wrongemail");
+        ReflectionTestUtils.setField(user, "email", "wrongemail");
         Mockito.when(userClient.create(Mockito.any()))
                 .thenReturn(ResponseEntity.ok(user));
 
@@ -72,6 +70,6 @@ class UserControllerIT {
                 .andExpect(status().is4xxClientError())
                 .andExpect(result -> assertInstanceOf(MethodArgumentNotValidException.class,
                         result.getResolvedException()));
-                //.andDo(MockMvcResultHandlers.print());
+        //.andDo(MockMvcResultHandlers.print());
     }
 }

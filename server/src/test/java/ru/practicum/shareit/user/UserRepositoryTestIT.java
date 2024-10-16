@@ -27,7 +27,7 @@ class UserRepositoryTestIT {
     }
 
     @Test
-    void GetAll_Users() {
+    void getAllUsers() {
         Collection<User> users = userRepository.findAll();
         assertEquals(1, users.size());
     }

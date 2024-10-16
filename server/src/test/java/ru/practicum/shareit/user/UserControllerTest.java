@@ -6,12 +6,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.ResponseEntity;
 
 import java.util.Collection;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
 class UserControllerTest {
@@ -41,7 +41,7 @@ class UserControllerTest {
     }
 
     @Test
-    void get_WhenUserIsExistThanUserReturned() {
+    void get_WhenUserIsExistThenUserReturned() {
         long userId = 1L;
         User user = new User(userId, "name", "mail@mail.ru");
 
@@ -55,7 +55,7 @@ class UserControllerTest {
     }
 
     @Test
-    void create_UserWhenEmailIsUniqueThanCreated() {
+    void create_UserWhenEmailIsUniqueThenCreated() {
         User user = User.builder().name("name").email("mail@mail.ru").build();
 
         Mockito
@@ -65,5 +65,17 @@ class UserControllerTest {
 
         assertEquals(user.getName(), userActual.getName());
         assertEquals(user.getEmail(), userActual.getEmail());
+    }
+
+    @Test
+    void delete_UserWhenUserIsExistThenDeleted() {
+        long userId = 0L;
+        User user = User.builder().id(userId).name("name").email("mail@mail.ru").build();
+
+        Mockito.doNothing().when(userService).delete(userId);
+
+        userController.delete(userId);
+
+        Mockito.verify(userService, Mockito.times(1)).delete(userId);
     }
 }

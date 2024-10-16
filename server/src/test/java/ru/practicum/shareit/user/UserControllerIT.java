@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.aot.DisabledInAotMode;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.nio.charset.StandardCharsets;
@@ -17,6 +18,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = UserController.class)
+@DisabledInAotMode
 class UserControllerIT {
 
     @Autowired
@@ -35,6 +37,7 @@ class UserControllerIT {
 
 
     @Test
+    @DisabledInAotMode
     void save_NewUserWhenUserEmailIsValidThenUserCreated() throws Exception {
         Mockito.when(userService.create(Mockito.any()))
                 .thenReturn(user);

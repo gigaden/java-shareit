@@ -28,4 +28,19 @@ class UserControllerTest {
         ResponseEntity<Object> response = userController.getAll();
         assertEquals(HttpStatus.OK, response.getStatusCode());
     }
+
+    @Test
+    void createWhenUserIsValidThenCreated() {
+        long userId = 1L;
+        UserDto user = new UserDto(userId, "userName", "email@mail.ru");
+
+        Mockito
+                .when(userClient.create(user)).thenReturn(new ResponseEntity<>(HttpStatus.CREATED));
+
+        ResponseEntity<Object> response = userController.create(user);
+
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+    }
+
+
 }

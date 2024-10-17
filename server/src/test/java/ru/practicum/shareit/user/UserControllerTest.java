@@ -6,12 +6,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import ru.practicum.shareit.exception.EmailUniqueException;
+import ru.practicum.shareit.exception.UserNotFoundException;
 
 import java.util.Collection;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 class UserControllerTest {
@@ -55,6 +56,18 @@ class UserControllerTest {
     }
 
     @Test
+    void get_WhenUserIsNotExistThenThrownUserNotFoundException() {
+        long userId = 1L;
+        User user = new User(userId, "name", "mail@mail.ru");
+
+        Mockito
+                .when(userService.get(userId))
+                .thenThrow(new UserNotFoundException(String.format("Пользователь с id=%d не найден", userId)));
+
+        assertThrows(UserNotFoundException.class, () -> userController.get(userId));
+    }
+
+    @Test
     void create_UserWhenEmailIsUniqueThenCreated() {
         User user = User.builder().name("name").email("mail@mail.ru").build();
 
@@ -68,6 +81,16 @@ class UserControllerTest {
     }
 
     @Test
+    void create_UserWhenEmailIsNotUniqueThenThrownEmailUniqueException() {
+        User user = User.builder().name("name").email("wrong_email").build();
+
+        Mockito
+                .when(userService.create(user)).thenThrow(new EmailUniqueException("Email is not unique."));
+
+        assertThrows(EmailUniqueException.class, () -> userController.create(user));
+    }
+
+    @Test
     void delete_UserWhenUserIsExistThenDeleted() {
         long userId = 0L;
         User user = User.builder().id(userId).name("name").email("mail@mail.ru").build();
@@ -78,4 +101,6 @@ class UserControllerTest {
 
         Mockito.verify(userService, Mockito.times(1)).delete(userId);
     }
+
+
 }

@@ -72,4 +72,21 @@ class UserControllerIT {
                         result.getResolvedException()));
         //.andDo(MockMvcResultHandlers.print());
     }
+
+    @Test
+    void createUserWhenIsNotValidThenThrown() throws Exception {
+        ReflectionTestUtils.setField(user, "name", null);
+        Mockito.when(userClient.create(Mockito.any()))
+                .thenReturn(ResponseEntity.ok(user));
+
+        mockMvc.perform(post("/users")
+                        .content(objectMapper.writeValueAsString(user))
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().is4xxClientError())
+                .andExpect(result -> assertInstanceOf(MethodArgumentNotValidException.class,
+                        result.getResolvedException()));
+
+    }
 }
